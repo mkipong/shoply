@@ -1,0 +1,23 @@
+{
+  "name": "Shoply",
+  "short_name": "Shoply",
+  "description": "Grocery price calculator and household cost tracker for Papua New Guinea",
+  "start_url": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#264653",
+  "theme_color": "#264653",
+  "icons": [
+    {
+      "src": "/static/images/icons8-online-store-48.png",
+      "sizes": "48x48",
+      "type": "image/png"
+    },
+    {
+      "src": "/static/images/icons8-buying-100.png",
+      "sizes": "100x100",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

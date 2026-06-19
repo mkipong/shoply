@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Shoply</title>
+<link rel="icon" type="image/png" href="{{ url_for('static', filename='images/icons8-online-store-48.png') }}">
+<link rel="manifest" href="{{ url_for('static', filename='manifest.json') }}">
+<meta name="theme-color" content="#264653">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}?v=2">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+
+<header class="topbar">
+  <div class="topbar-brand">
+    <img class="brand-mark" src="{{ url_for('static', filename='images/icons8-buying-100.png') }}" alt="Shoply">
+    <span class="brand-name">Shoply</span>
+  </div>
+  <nav class="tabs" id="mainTabs">
+    <button class="tab-btn active" data-tab="shop">Shop</button>
+    <button class="tab-btn" data-tab="list">List</button>
+    <button class="tab-btn" data-tab="history">History</button>
+    <button class="tab-btn" data-tab="analytics">Analytics</button>
+    <button class="tab-btn" data-tab="prices">Prices</button>
+    <button class="tab-btn" data-tab="pantry">Pantry</button>
+    <button class="tab-btn" data-tab="costs">Costs <span class="tab-badge hidden" id="overdueBadge"></span></button>
+    <button class="tab-btn" data-tab="settings">Settings</button>
+  </nav>
+</header>
+
+<main class="app-main">
+
+  <!-- ===================== SHOP TAB ===================== -->
+  <section class="tab-panel active" id="panel-shop">
+
+    <div class="panel-row">
+      <div class="card shop-select-card">
+        <label class="field-label" for="shopSelect">Shopping at</label>
+        <select id="shopSelect" class="select-input">
+          <option value="">— No shop selected —</option>
+        </select>
+      </div>
+
+      <div class="card budget-card">
+        <label class="field-label" for="budgetInput">Budget limit (optional)</label>
+        <div class="input-with-prefix">
+          <span class="prefix">K</span>
+          <input type="number" id="budgetInput" class="text-input" placeholder="0.00" min="0" step="0.01">
+        </div>
+      </div>
+    </div>
+
+    <div class="card add-item-card">
+      <div class="add-item-header">
+        <span class="field-label">Add an item</span>
+        <button class="link-btn" id="toggleQuickPick" type="button">Quick-pick from this shop</button>
+      </div>
+
+      <div id="quickPickWrap" class="quick-pick-wrap hidden">
+        <input type="text" id="quickPickSearch" class="text-input" placeholder="Search items at this shop…">
+        <div id="quickPickList" class="quick-pick-list"></div>
+      </div>
+
+      <form id="addItemForm" class="add-item-form" autocomplete="off">
+        <div class="form-grid">
+          <div class="form-field grow">
+            <label class="field-label-sm">Item name</label>
+            <input type="text" id="itemName" class="text-input" placeholder="e.g. Rice 10kg" required>
+          </div>
+          <div class="form-field">
+            <label class="field-label-sm">Unit price</label>
+            <div class="input-with-prefix">
+              <span class="prefix">K</span>
+              <input type="number" id="itemPrice" class="text-input" placeholder="0.00" min="0" step="0.01" required>
+            </div>
+          </div>
+          <div class="form-field narrow">
+            <label class="field-label-sm">Qty</label>
+            <input type="number" id="itemQty" class="text-input" placeholder="1" min="0" step="0.01" value="1" required>
+          </div>
+          <div class="form-field narrow">
+            <label class="field-label-sm">Unit</label>
+            <select id="itemUnit" class="select-input">
+              <option value="each">each</option>
+              <option value="kg">kg</option>
+              <option value="g">g</option>
+              <option value="litre">litre</option>
+              <option value="pack">pack</option>
+              <option value="box">box</option>
+              <option value="dozen">dozen</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Unit price calculator -->
+        <div class="unit-calc-row" id="unitCalcRow">
+          <span class="field-label-sm">Or enter total cost</span>
+          <div class="input-with-prefix unit-calc-input">
+            <span class="prefix">K</span>
+            <input type="number" id="itemTotalCost" class="text-input" placeholder="e.g. 25.00 for the whole bag" min="0" step="0.01">
+          </div>
+          <span class="unit-price-hint" id="unitPriceHint"></span>
+        </div>
+
+        <div class="form-grid-secondary">
+          <div class="form-field">
+            <label class="field-label-sm">Category (optional)</label>
+            <select id="itemCategory" class="select-input"><option value="">—</option></select>
+          </div>
+          <div class="form-field">
+            <label class="field-label-sm">Photo (optional)</label>
+            <input type="file" id="itemPhoto" accept="image/*" capture="environment" class="file-input">
+          </div>
+        </div>
+
+        <div class="line-preview" id="linePreview">Line total: <strong>K0.00</strong></div>
+
+        <button type="submit" class="btn btn-primary btn-block">Add to cart</button>
+      </form>
+    </div>
+
+    <div class="card cart-card">
+      <div class="cart-header">
+        <span class="field-label">Cart</span>
+        <span class="cart-count" id="cartCount">0 items</span>
+      </div>
+      <div id="cartList" class="cart-list">
+        <p class="empty-hint">No items yet. Add something above to start your total.</p>
+      </div>
+    </div>
+
+  </section>
+
+  <!-- ===================== LIST TAB ===================== -->
+  <section class="tab-panel" id="panel-list">
+
+    <div class="card">
+      <span class="field-label">Add to list</span>
+      <form id="addListForm" class="add-item-form" autocomplete="off" style="margin-top:10px;">
+        <div class="form-grid">
+          <div class="form-field grow">
+            <label class="field-label-sm">Item name</label>
+            <input type="text" id="listItemName" class="text-input" placeholder="e.g. Cooking oil" required>
+          </div>
+          <div class="form-field narrow">
+            <label class="field-label-sm">Qty</label>
+            <input type="number" id="listItemQty" class="text-input" placeholder="1" min="0.01" step="0.01" value="1">
+          </div>
+          <div class="form-field narrow">
+            <label class="field-label-sm">Unit</label>
+            <select id="listItemUnit" class="select-input">
+              <option value="each">each</option>
+              <option value="kg">kg</option>
+              <option value="g">g</option>
+              <option value="litre">litre</option>
+              <option value="pack">pack</option>
+              <option value="box">box</option>
+              <option value="dozen">dozen</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-field" style="margin-top:8px;">
+          <label class="field-label-sm">Note (optional)</label>
+          <input type="text" id="listItemNote" class="text-input" placeholder="e.g. brand preference">
+        </div>
+        <button type="submit" class="btn btn-primary btn-block" style="margin-top:12px;">Add to list</button>
+      </form>
+    </div>
+
+    <div class="card">
+      <div class="card-header-row">
+        <span class="field-label">Your list</span>
+        <button class="link-btn" id="clearCheckedBtn" type="button">Clear checked</button>
+      </div>
+      <div id="shoppingListItems" class="shopping-list-wrap">
+        <p class="empty-hint">Your list is empty. Add items above.</p>
+      </div>
+    </div>
+
+  </section>
+
+  <!-- ===================== HISTORY TAB ===================== -->
+  <section class="tab-panel" id="panel-history">
+    <div class="card">
+      <div class="card-header-row">
+        <span class="field-label">Past shopping trips</span>
+        <a class="link-btn" href="/api/export/items.csv">Export prices (CSV)</a>
+      </div>
+      <div id="tripHistoryList" class="trip-history-list">
+        <p class="empty-hint">No trips saved yet.</p>
+      </div>
+    </div>
+
+    <div class="card">
+      <span class="field-label">Price comparison</span>
+      <p class="hint-text" style="margin-bottom:8px;">Search an item to see its price at every shop.</p>
+      <input type="text" id="compareSearch" class="text-input" placeholder="e.g. rice, milk, fuel…">
+      <div id="compareResults" class="quick-pick-list" style="margin-top:10px;"></div>
+    </div>
+
+    <div class="card">
+      <span class="field-label">Search any item, any shop</span>
+      <input type="text" id="globalItemSearch" class="text-input" placeholder="e.g. rice, fuel, milk…" style="margin-top:8px;">
+      <div id="globalSearchResults" class="quick-pick-list" style="margin-top:10px;"></div>
+    </div>
+  </section>
+
+  <!-- ===================== ANALYTICS TAB ===================== -->
+  <section class="tab-panel" id="panel-analytics">
+
+    <div class="summary-strip" id="analyticsSummary">
+      <div class="summary-item">
+        <span class="summary-label">Total trips</span>
+        <span class="summary-value" id="statTotalTrips">—</span>
+      </div>
+      <div class="summary-item">
+        <span class="summary-label">Total spent</span>
+        <span class="summary-value positive" id="statTotalSpent">—</span>
+      </div>
+      <div class="summary-item">
+        <span class="summary-label">Avg per trip</span>
+        <span class="summary-value" id="statAvgTrip">—</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <span class="field-label">Monthly spending</span>
+      <div id="chartMonthly" class="bar-chart-wrap"></div>
+    </div>
+
+    <div class="card">
+      <span class="field-label">By shop</span>
+      <div id="chartByShop" class="bar-chart-wrap"></div>
+    </div>
+
+  </section>
+
+  <!-- ===================== PRICES TAB ===================== -->
+  <section class="tab-panel" id="panel-prices">
+    <div class="card">
+      <div class="card-header-row">
+        <span class="field-label">All products &amp; prices</span>
+        <a class="link-btn" href="/api/export/items.csv">Export CSV</a>
+      </div>
+      <input type="text" id="pricesSearch" class="text-input" placeholder="Search products…" style="margin-top:8px;">
+      <div id="pricesList" style="margin-top:12px;">
+        <p class="empty-hint">Loading…</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== PANTRY TAB ===================== -->
+  <section class="tab-panel" id="panel-pantry">
+
+    <div class="card low-stock-card hidden" id="lowStockCard">
+      <span class="field-label" style="color:var(--burnt-peach);">Low / out of stock</span>
+      <div id="lowStockList" class="settings-list" style="margin-top:8px;"></div>
+    </div>
+
+    <div class="card">
+      <span class="field-label">Add item</span>
+      <form id="addPantryForm" class="add-item-form" autocomplete="off" style="margin-top:10px;">
+        <div class="form-grid">
+          <div class="form-field grow">
+            <label class="field-label-sm">Name</label>
+            <input type="text" id="pantryName" class="text-input" placeholder="e.g. Rice" required>
+          </div>
+          <div class="form-field narrow">
+            <label class="field-label-sm">Qty</label>
+            <input type="number" id="pantryQty" class="text-input" placeholder="1" min="0" step="0.01" value="1">
+          </div>
+          <div class="form-field narrow">
+            <label class="field-label-sm">Unit</label>
+            <select id="pantryUnit" class="select-input">
+              <option value="each">each</option>
+              <option value="kg">kg</option>
+              <option value="g">g</option>
+              <option value="litre">litre</option>
+              <option value="pack">pack</option>
+              <option value="box">box</option>
+              <option value="dozen">dozen</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-grid-secondary" style="margin-top:8px;">
+          <div class="form-field">
+            <label class="field-label-sm">Low threshold</label>
+            <input type="number" id="pantryThreshold" class="text-input" placeholder="1" min="0" step="0.01" value="1">
+          </div>
+          <div class="form-field">
+            <label class="field-label-sm">Notes</label>
+            <input type="text" id="pantryNotes" class="text-input" placeholder="Optional">
+          </div>
+        </div>
+        <button type="submit" class="btn btn-primary btn-block" style="margin-top:12px;">Add to pantry</button>
+      </form>
+    </div>
+
+    <div class="card">
+      <span class="field-label">Stock</span>
+      <div id="pantryList" class="settings-list" style="margin-top:8px;">
+        <p class="empty-hint">No items tracked yet.</p>
+      </div>
+    </div>
+
+  </section>
+
+  <!-- ===================== OTHER COSTS TAB ===================== -->
+  <section class="tab-panel" id="panel-costs">
+
+    <div class="summary-strip" id="costsSummary">
+      <div class="summary-item">
+        <span class="summary-label">You owe (pending)</span>
+        <span class="summary-value negative" id="sumOwedByMe">K0.00</span>
+      </div>
+      <div class="summary-item">
+        <span class="summary-label">Owed to you</span>
+        <span class="summary-value positive" id="sumOwedToMe">K0.00</span>
+      </div>
+      <div class="summary-item">
+        <span class="summary-label">Paid out (total)</span>
+        <span class="summary-value" id="sumPaid">K0.00</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <span class="field-label">Add a cost</span>
+      <form id="addCostForm" class="add-item-form" autocomplete="off" style="margin-top:10px;">
+        <div class="form-grid">
+          <div class="form-field grow">
+            <label class="field-label-sm">Who / what</label>
+            <input type="text" id="costPayee" class="text-input" placeholder="e.g. Gardener, Babysitter, John (debt)" required>
+          </div>
+          <div class="form-field">
+            <label class="field-label-sm">Amount</label>
+            <div class="input-with-prefix">
+              <span class="prefix">K</span>
+              <input type="number" id="costAmount" class="text-input" placeholder="0.00" min="0" step="0.01" required>
+            </div>
+          </div>
+        </div>
+        <div class="form-grid-secondary">
+          <div class="form-field">
+            <label class="field-label-sm">Category</label>
+            <select id="costCategory" class="select-input">
+              <option>Household help</option>
+              <option>Childcare</option>
+              <option>Debt</option>
+              <option>Utilities</option>
+              <option>Transport</option>
+              <option>General</option>
+            </select>
+          </div>
+          <div class="form-field">
+            <label class="field-label-sm">Direction</label>
+            <select id="costDirection" class="select-input">
+              <option value="owed_by_me">I owe / I pay this</option>
+              <option value="owed_to_me">Someone owes me</option>
+            </select>
+          </div>
+          <div class="form-field">
+            <label class="field-label-sm">Due date (optional)</label>
+            <input type="date" id="costDueDate" class="text-input">
+          </div>
+        </div>
+        <div class="form-field" style="margin-top:10px;">
+          <label class="field-label-sm">Notes</label>
+          <input type="text" id="costNotes" class="text-input" placeholder="Optional notes">
+        </div>
+        <button type="submit" class="btn btn-primary btn-block" style="margin-top:12px;">Add cost</button>
+      </form>
+    </div>
+
+    <div class="card">
+      <div class="card-header-row">
+        <span class="field-label">All costs</span>
+        <a class="link-btn" href="/api/export/other-costs.csv">Export (CSV)</a>
+      </div>
+      <div id="costsList" class="cost-list"></div>
+    </div>
+
+  </section>
+
+  <!-- ===================== SETTINGS TAB ===================== -->
+  <section class="tab-panel" id="panel-settings">
+
+    <div class="card">
+      <span class="field-label">Shops</span>
+      <form id="addShopForm" class="add-item-form" autocomplete="off" style="margin-top:10px;">
+        <div class="form-grid">
+          <div class="form-field grow">
+            <label class="field-label-sm">Shop name</label>
+            <input type="text" id="shopName" class="text-input" placeholder="e.g. PriceSmart Kimbe" required>
+          </div>
+          <div class="form-field grow">
+            <label class="field-label-sm">Location</label>
+            <input type="text" id="shopLocation" class="text-input" placeholder="e.g. Kimbe Town">
+          </div>
+        </div>
+        <div class="form-field" style="margin-top:10px;">
+          <label class="field-label-sm">Notes</label>
+          <input type="text" id="shopNotes" class="text-input" placeholder="Optional notes">
+        </div>
+        <button type="submit" class="btn btn-primary btn-block" style="margin-top:12px;">Add shop</button>
+      </form>
+      <div id="shopsList" class="settings-list" style="margin-top:14px;"></div>
+    </div>
+
+    <div class="card">
+      <span class="field-label">Categories</span>
+      <form id="addCategoryForm" class="add-item-form" autocomplete="off" style="margin-top:10px;">
+        <div class="form-grid">
+          <div class="form-field grow">
+            <input type="text" id="categoryName" class="text-input" placeholder="New category name" required>
+          </div>
+          <button type="submit" class="btn btn-secondary">Add</button>
+        </div>
+      </form>
+      <div id="categoriesList" class="settings-list" style="margin-top:14px;"></div>
+    </div>
+
+    <div class="card">
+      <span class="field-label">Receipt tax</span>
+      <p class="hint-text">Some shops include 10% GST on the till receipt. Toggle this when finalising a trip if you want your total to match.</p>
+      <label class="toggle-row">
+        <input type="checkbox" id="settingsTaxToggle">
+        <span>Apply GST (10%) on saved trips by default</span>
+      </label>
+    </div>
+
+    <div class="card">
+      <span class="field-label">About</span>
+      <p class="hint-text">Shoply stores everything locally in its own database — shops, item prices, photos, trip history, pantry stock and other costs. Currency is fixed to Papua New Guinea Kina (K).</p>
+    </div>
+
+  </section>
+
+</main>
+
+<!-- Sticky receipt strip -->
+<div class="receipt-strip" id="receiptStrip">
+  <div class="receipt-edge"></div>
+  <div class="receipt-body">
+    <div class="receipt-row">
+      <span>Subtotal</span>
+      <span id="receiptSubtotal">K0.00</span>
+    </div>
+    <div class="receipt-row tax-row hidden" id="receiptTaxRow">
+      <span>GST (10%)</span>
+      <span id="receiptTax">K0.00</span>
+    </div>
+    <div class="receipt-row total-row">
+      <span>Total</span>
+      <span id="receiptTotal">K0.00</span>
+    </div>
+    <div class="budget-warning hidden" id="budgetWarning">Over budget!</div>
+  </div>
+  <div class="receipt-actions">
+    <label class="toggle-row tax-toggle-row">
+      <input type="checkbox" id="tripTaxToggle">
+      <span>+GST</span>
+    </label>
+    <button class="btn btn-gold" id="checkoutBtn">Checkout &amp; save trip</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="{{ url_for('static', filename='js/app.js') }}?v=2"></script>
+</body>
+</html>

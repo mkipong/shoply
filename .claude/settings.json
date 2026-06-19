@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "allow": [
+      "PowerShell(Rename-Item -Path \"c:\\\\Users\\\\MoiraKipong\\\\OneDrive - PNG Oil Palm Research Association Ltd\\\\ALL FILES - 2026\\\\APP_DEV\\\\kina_shopper\\\\kina_shopper\" -NewName \"shoply\")",
+      "PowerShell([System.IO.Directory]::Move\\(\"c:\\\\Users\\\\MoiraKipong\\\\OneDrive - PNG Oil Palm Research Association Ltd\\\\ALL FILES - 2026\\\\APP_DEV\\\\kina_shopper\\\\kina_shopper\", \"c:\\\\Users\\\\MoiraKipong\\\\OneDrive - PNG Oil Palm Research Association Ltd\\\\ALL FILES - 2026\\\\APP_DEV\\\\kina_shopper\\\\shoply\"\\))",
+      "Read(//c/ngrok/**)",
+      "PowerShell(New-Item -ItemType Directory -Force \"C:\\\\ngrok\" | Out-Null; Expand-Archive -Path \"$env:USERPROFILE\\\\Downloads\\\\ngrok-v3-stable-windows-amd64.zip\" -DestinationPath \"C:\\\\ngrok\" -Force; Get-ChildItem \"C:\\\\ngrok\")",
+      "PowerShell(Get-Command ngrok -ErrorAction SilentlyContinue; Get-ChildItem \"C:\\\\\", \"$env:USERPROFILE\", \"$env:APPDATA\", \"$env:LOCALAPPDATA\", \"$env:ProgramFiles\", \"$env:ProgramFiles\\(x86\\)\" -Filter \"ngrok.exe\" -Recurse -ErrorAction SilentlyContinue 2>$null | Select-Object FullName)",
+      "Skill(run)",
+      "Skill(run:*)",
+      "PowerShell(Start-Process -NoNewWindow -FilePath \"ngrok\" -ArgumentList \"http 5000\" -PassThru)"
+    ]
+  }
+}
