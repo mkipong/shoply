@@ -77,7 +77,21 @@ input, select { font-family: inherit; }
   font-weight: 700;
   font-size: 17px;
   letter-spacing: -0.2px;
+  flex: 1;
 }
+
+.logout-btn {
+  font-size: 12px;
+  font-weight: 600;
+  color: rgba(255,255,255,0.6);
+  text-decoration: none;
+  padding: 4px 10px;
+  border: 1px solid rgba(255,255,255,0.25);
+  border-radius: 6px;
+  transition: color 0.15s;
+}
+
+.logout-btn:hover { color: #fff; }
 
 .tabs {
   display: flex;

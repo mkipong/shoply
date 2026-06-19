@@ -8,7 +8,7 @@ import base64
 from datetime import datetime, date
 from io import BytesIO
 
-from flask import Flask, render_template, request, jsonify, send_file, abort
+from flask import Flask, render_template, request, jsonify, send_file, abort, session, redirect, url_for
 from sqlalchemy import func, text
 
 from models import (
@@ -23,6 +23,8 @@ _db_path = os.environ.get("DATABASE_PATH", os.path.join("/tmp", "shoply.db"))
 os.makedirs(os.path.dirname(os.path.abspath(_db_path)), exist_ok=True)
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///" + _db_path
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
+app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY", "change-this-in-production")
+APP_PASSWORD = os.environ.get("APP_PASSWORD", "shoply")
 app.config["MAX_CONTENT_LENGTH"] = 8 * 1024 * 1024  # 8 MB
 
 db.init_app(app)
@@ -51,6 +53,35 @@ with app.app_context():
             except Exception:
                 pass  # column already exists
     seed_defaults()
+
+
+# ---------------------------------------------------------------------------
+# Auth
+# ---------------------------------------------------------------------------
+
+@app.before_request
+def require_login():
+    if request.path.startswith("/static") or request.path == "/login" or request.path == "/sw.js":
+        return
+    if not session.get("logged_in"):
+        return redirect(url_for("login"))
+
+
+@app.route("/login", methods=["GET", "POST"])
+def login():
+    error = None
+    if request.method == "POST":
+        if request.form.get("password") == APP_PASSWORD:
+            session["logged_in"] = True
+            return redirect(url_for("index"))
+        error = "Incorrect password. Try again."
+    return render_template("login.html", error=error)
+
+
+@app.route("/logout")
+def logout():
+    session.clear()
+    return redirect(url_for("login"))
 
 
 # ---------------------------------------------------------------------------

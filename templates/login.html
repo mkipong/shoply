@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Shoply — Login</title>
+<link rel="icon" type="image/png" href="{{ url_for('static', filename='images/icons8-online-store-48.png') }}">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Inter', system-ui, sans-serif;
+    background: #264653;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+  }
+
+  .login-card {
+    background: #fff;
+    border-radius: 16px;
+    padding: 40px 36px;
+    width: 100%;
+    max-width: 380px;
+    box-shadow: 0 8px 40px rgba(0,0,0,0.25);
+  }
+
+  .login-brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 32px;
+  }
+
+  .login-brand img {
+    width: 44px;
+    height: 44px;
+    border-radius: 10px;
+  }
+
+  .login-brand-name {
+    font-size: 24px;
+    font-weight: 800;
+    color: #264653;
+    letter-spacing: -0.5px;
+  }
+
+  .login-label {
+    display: block;
+    font-size: 13px;
+    font-weight: 600;
+    color: #5c7078;
+    margin-bottom: 8px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .login-input {
+    width: 100%;
+    padding: 12px 14px;
+    border: 2px solid #d4e1e6;
+    border-radius: 10px;
+    font-size: 16px;
+    font-family: inherit;
+    color: #1d2d35;
+    outline: none;
+    transition: border-color 0.15s;
+  }
+
+  .login-input:focus { border-color: #2a9d8f; }
+
+  .login-error {
+    background: #fef0ed;
+    color: #e76f51;
+    font-size: 13px;
+    font-weight: 600;
+    padding: 10px 14px;
+    border-radius: 8px;
+    margin-top: 12px;
+  }
+
+  .login-btn {
+    width: 100%;
+    margin-top: 20px;
+    padding: 14px;
+    background: #264653;
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    font-size: 15px;
+    font-weight: 700;
+    font-family: inherit;
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+
+  .login-btn:hover { background: #2a9d8f; }
+</style>
+</head>
+<body>
+  <div class="login-card">
+    <div class="login-brand">
+      <img src="{{ url_for('static', filename='images/icons8-buying-100.png') }}" alt="Shoply">
+      <span class="login-brand-name">Shoply</span>
+    </div>
+
+    <form method="POST" action="/login">
+      <label class="login-label" for="password">Password</label>
+      <input class="login-input" type="password" id="password" name="password" placeholder="Enter your password" autofocus required>
+      {% if error %}
+        <div class="login-error">{{ error }}</div>
+      {% endif %}
+      <button class="login-btn" type="submit">Sign in</button>
+    </form>
+  </div>
+</body>
+</html>
