@@ -20,6 +20,7 @@ BASE_DIR = os.path.abspath(os.path.dirname(__file__))
 
 app = Flask(__name__)
 _db_path = os.environ.get("DATABASE_PATH", os.path.join(BASE_DIR, "instance", "shoply.db"))
+os.makedirs(os.path.dirname(_db_path), exist_ok=True)
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///" + _db_path
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 app.config["MAX_CONTENT_LENGTH"] = 8 * 1024 * 1024  # 8 MB
